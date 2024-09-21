@@ -884,6 +884,15 @@ class V8_EXPORT_PRIVATE MacroAssembler : public MacroAssemblerBase {
   bool IsDoubleZeroRegSet() { return has_double_zero_reg_set_; }
   bool IsSingleZeroRegSet() { return has_single_zero_reg_set_; }
 
+  inline void MoveIfZero(Register rd, Register rj, Register rk) {
+    CHECK(CpuFeatures::IsSupported(ZICOND));
+    UseScratchRegisterScope temps(this);
+    Register scratch = temps.Acquire();
+    czero_nez(scratch, rj, rk);
+    czero_eqz(rd, rd, rk);
+    or_(rd, rd, scratch);
+  }
+
   inline void Move(Register dst, Tagged<Smi> smi) { li(dst, Operand(smi)); }
 
   inline void Move(Register dst, Register src) {
@@ -1610,6 +1619,12 @@ class V8_EXPORT_PRIVATE MacroAssembler : public MacroAssemblerBase {
   void DecodeField(Register reg) {
     DecodeField<Field>(reg, reg);
   }
+
+#ifdef V8_ENABLE_LEAPTIERING
+  // Load the entrypoint pointer of a JSDispatchTable entry.
+  void LoadCodeEntrypointFromJSDispatchTable(Register destination,
+                                             MemOperand field_operand);
+#endif  // V8_ENABLE_LEAPTIERING
   // Load a protected pointer field.
   void LoadProtectedPointerField(Register destination,
                                  MemOperand field_operand);

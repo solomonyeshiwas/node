@@ -20,7 +20,9 @@
 #include "src/heap/free-list-inl.h"
 #include "src/heap/gc-tracer-inl.h"
 #include "src/heap/gc-tracer.h"
+#include "src/heap/heap-layout-inl.h"
 #include "src/heap/heap.h"
+#include "src/heap/live-object-range-inl.h"
 #include "src/heap/mark-compact-inl.h"
 #include "src/heap/mark-compact.h"
 #include "src/heap/marking-inl.h"
@@ -526,7 +528,7 @@ class PromotedPageRecordMigratedSlotVisitor final
 
  private:
   V8_INLINE void VerifyHost(Tagged<HeapObject> host) {
-    DCHECK(!InWritableSharedSpace(host));
+    DCHECK(!HeapLayout::InWritableSharedSpace(host));
     DCHECK(!Heap::InYoungGeneration(host));
     DCHECK(!MutablePageMetadata::FromHeapObject(host)->SweepingDone());
     DCHECK_EQ(MutablePageMetadata::FromHeapObject(host), host_page_);

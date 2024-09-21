@@ -20,6 +20,7 @@
 #include "src/handles/maybe-handles.h"
 #include "src/heap/factory-inl.h"
 #include "src/heap/heap-inl.h"
+#include "src/heap/heap-layout-inl.h"
 #include "src/heap/mutable-page-metadata.h"
 #include "src/heap/pretenuring-handler-inl.h"
 #include "src/init/bootstrapper.h"
@@ -2910,7 +2911,7 @@ void JSObject::JSObjectShortPrint(StringStream* accumulator) {
         if (IsJSFunction(constructor)) {
           Tagged<SharedFunctionInfo> sfi =
               Cast<JSFunction>(constructor)->shared();
-          if (!InReadOnlySpace(sfi) && !heap->Contains(sfi)) {
+          if (!HeapLayout::InReadOnlySpace(sfi) && !heap->Contains(sfi)) {
             accumulator->Add("!!!INVALID SHARED ON CONSTRUCTOR!!!");
           } else {
             Tagged<String> constructor_name = sfi->Name();
@@ -5462,11 +5463,9 @@ bool JSObject::UpdateAllocationSite(DirectHandle<JSObject> object,
     DisallowGarbageCollection no_gc;
 
     Heap* heap = object->GetHeap();
-    PretenuringHandler* pretunring_handler = heap->pretenuring_handler();
     Tagged<AllocationMemento> memento =
-        pretunring_handler
-            ->FindAllocationMemento<PretenuringHandler::kForRuntime>(
-                object->map(), *object);
+        PretenuringHandler::FindAllocationMemento<
+            PretenuringHandler::kForRuntime>(heap, object->map(), *object);
     if (memento.is_null()) return false;
 
     // Walk through to the Allocation Site

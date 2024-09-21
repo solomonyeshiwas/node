@@ -59,9 +59,6 @@ std::shared_ptr<NativeModule> CompileToNativeModule(
     int compilation_id, v8::metrics::Recorder::ContextId context_id,
     ProfileInformation* pgo_info);
 
-V8_EXPORT_PRIVATE
-void CompileJsToWasmWrappers(Isolate* isolate, const WasmModule* module);
-
 V8_EXPORT_PRIVATE WasmError ValidateAndSetBuiltinImports(
     const WasmModule* module, base::Vector<const uint8_t> wire_bytes,
     const CompileTimeImports& imports);
@@ -70,10 +67,12 @@ V8_EXPORT_PRIVATE WasmError ValidateAndSetBuiltinImports(
 // cache entry. Assumes the key already exists in the cache but has not been
 // compiled yet.
 V8_EXPORT_PRIVATE
-WasmCode* CompileImportWrapper(
-    NativeModule* native_module, Counters* counters, ImportCallKind kind,
-    const FunctionSig* sig, uint32_t canonical_type_index, int expected_arity,
-    Suspend suspend, WasmImportWrapperCache::ModificationScope* cache_scope);
+WasmCode* CompileImportWrapperForTest(Isolate* isolate,
+                                      NativeModule* native_module,
+                                      ImportCallKind kind,
+                                      const FunctionSig* sig,
+                                      uint32_t canonical_type_index,
+                                      int expected_arity, Suspend suspend);
 
 // Triggered by the WasmCompileLazy builtin. The return value indicates whether
 // compilation was successful. Lazy compilation can fail only if validation is

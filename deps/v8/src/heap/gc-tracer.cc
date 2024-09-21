@@ -228,6 +228,8 @@ void GCTracer::StartCycle(GarbageCollector collector,
   DCHECK(!young_gc_while_full_gc_);
 
   young_gc_while_full_gc_ = current_.state != Event::State::NOT_RUNNING;
+  CHECK_IMPLIES(v8_flags.separate_gc_phases && young_gc_while_full_gc_,
+                current_.state == Event::State::SWEEPING);
   if (young_gc_while_full_gc_) {
     // The cases for interruption are: Scavenger, MinorMS interrupting sweeping.
     // In both cases we are fine with fetching background counters now and
@@ -812,7 +814,6 @@ void GCTracer::PrintNVP() const {
           "time_to_safepoint=%.2f "
           "heap.prologue=%.2f "
           "heap.epilogue=%.2f "
-          "heap.epilogue.reduce_new_space=%.2f "
           "heap.external.prologue=%.2f "
           "heap.external.epilogue=%.2f "
           "heap.external_weak_global_handles=%.2f "
@@ -852,7 +853,6 @@ void GCTracer::PrintNVP() const {
           current_.scopes[Scope::TIME_TO_SAFEPOINT].InMillisecondsF(),
           current_scope(Scope::HEAP_PROLOGUE),
           current_scope(Scope::HEAP_EPILOGUE),
-          current_scope(Scope::HEAP_EPILOGUE_REDUCE_NEW_SPACE),
           current_scope(Scope::HEAP_EXTERNAL_PROLOGUE),
           current_scope(Scope::HEAP_EXTERNAL_EPILOGUE),
           current_scope(Scope::HEAP_EXTERNAL_WEAK_GLOBAL_HANDLES),
@@ -984,7 +984,6 @@ void GCTracer::PrintNVP() const {
           "heap.prologue=%.2f "
           "heap.embedder_tracing_epilogue=%.2f "
           "heap.epilogue=%.2f "
-          "heap.epilogue.reduce_new_space=%.2f "
           "heap.external.prologue=%.1f "
           "heap.external.epilogue=%.1f "
           "heap.external.weak_global_handles=%.1f "
@@ -1078,7 +1077,6 @@ void GCTracer::PrintNVP() const {
           current_scope(Scope::HEAP_PROLOGUE),
           current_scope(Scope::HEAP_EMBEDDER_TRACING_EPILOGUE),
           current_scope(Scope::HEAP_EPILOGUE),
-          current_scope(Scope::HEAP_EPILOGUE_REDUCE_NEW_SPACE),
           current_scope(Scope::HEAP_EXTERNAL_PROLOGUE),
           current_scope(Scope::HEAP_EXTERNAL_EPILOGUE),
           current_scope(Scope::HEAP_EXTERNAL_WEAK_GLOBAL_HANDLES),

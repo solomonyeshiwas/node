@@ -71,7 +71,7 @@ class RegExpImpl final : public AllStatic {
   // than one in the case of global regular expressions.
   // The captures and subcaptures are stored into the registers vector.
   // If matching fails, returns RE_FAILURE.
-  // If execution fails, sets a exception and returns RE_EXCEPTION.
+  // If execution fails, sets an exception and returns RE_EXCEPTION.
   static int IrregexpExecRaw(Isolate* isolate,
                              DirectHandle<IrRegExpData> regexp_data,
                              Handle<String> subject, int index, int32_t* output,
@@ -917,10 +917,10 @@ bool RegExpImpl::Compile(Isolate* isolate, Zone* zone, RegExpCompileData* data,
 #elif V8_TARGET_ARCH_ARM64
     macro_assembler.reset(new RegExpMacroAssemblerARM64(isolate, zone, mode,
                                                         output_register_count));
-#elif V8_TARGET_ARCH_S390
+#elif V8_TARGET_ARCH_S390X
     macro_assembler.reset(new RegExpMacroAssemblerS390(isolate, zone, mode,
                                                        output_register_count));
-#elif V8_TARGET_ARCH_PPC || V8_TARGET_ARCH_PPC64
+#elif V8_TARGET_ARCH_PPC64
     macro_assembler.reset(new RegExpMacroAssemblerPPC(isolate, zone, mode,
                                                       output_register_count));
 #elif V8_TARGET_ARCH_MIPS64
@@ -1009,7 +1009,7 @@ bool RegExpImpl::Compile(Isolate* isolate, Zone* zone, RegExpCompileData* data,
 #endif
     if (v8_flags.print_regexp_bytecode &&
         data->compilation_target == RegExpCompilationTarget::kBytecode) {
-      auto bytecode = Cast<ByteArray>(result.code);
+      auto bytecode = Cast<TrustedByteArray>(result.code);
       std::unique_ptr<char[]> pattern_cstring = pattern->ToCString();
       RegExpBytecodeDisassemble(bytecode->begin(), bytecode->length(),
                                 pattern_cstring.get());
@@ -1208,6 +1208,7 @@ Tagged<Object> RegExpResultsCache::Lookup(Heap* heap, Tagged<String> key_string,
                                           Tagged<Object> key_pattern,
                                           Tagged<FixedArray>* last_match_cache,
                                           ResultsCacheType type) {
+  if (V8_UNLIKELY(!v8_flags.regexp_results_cache)) return Smi::zero();
   Tagged<FixedArray> cache;
   if (!IsInternalizedString(key_string)) return Smi::zero();
   if (type == STRING_SPLIT_SUBSTRINGS) {
@@ -1243,6 +1244,7 @@ void RegExpResultsCache::Enter(Isolate* isolate,
                                DirectHandle<FixedArray> value_array,
                                DirectHandle<FixedArray> last_match_cache,
                                ResultsCacheType type) {
+  if (V8_UNLIKELY(!v8_flags.regexp_results_cache)) return;
   Factory* factory = isolate->factory();
   DirectHandle<FixedArray> cache;
   if (!IsInternalizedString(*key_string)) return;

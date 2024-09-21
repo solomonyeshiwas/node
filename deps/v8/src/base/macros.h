@@ -186,6 +186,13 @@ V8_INLINE Dest bit_cast(Source const& source) {
 #endif
 #endif
 
+// Define V8_USE_SAFE_STACK macro.
+#if defined(__has_feature)
+#if __has_feature(safe_stack)
+#define V8_USE_SAFE_STACK 1
+#endif  // __has_feature(safe_stack)
+#endif  // defined(__has_feature)
+
 // DISABLE_CFI_PERF -- Disable Control Flow Integrity checks for Perf reasons.
 #define DISABLE_CFI_PERF V8_CLANG_NO_SANITIZE("cfi")
 
@@ -423,9 +430,9 @@ bool is_inbounds(float_t v) {
 // Setup for Windows shared library export.
 #define V8_EXPORT_ENUM
 #ifdef BUILDING_V8_SHARED_PRIVATE
-#define V8_EXPORT_PRIVATE
+#define V8_EXPORT_PRIVATE __declspec(dllexport)
 #elif USING_V8_SHARED_PRIVATE
-#define V8_EXPORT_PRIVATE
+#define V8_EXPORT_PRIVATE __declspec(dllimport)
 #else
 #define V8_EXPORT_PRIVATE
 #endif  // BUILDING_V8_SHARED
@@ -435,8 +442,8 @@ bool is_inbounds(float_t v) {
 // Setup for Linux shared library export.
 #if V8_HAS_ATTRIBUTE_VISIBILITY
 #ifdef BUILDING_V8_SHARED_PRIVATE
-#define V8_EXPORT_PRIVATE
-#define V8_EXPORT_ENUM
+#define V8_EXPORT_PRIVATE __attribute__((visibility("default")))
+#define V8_EXPORT_ENUM V8_EXPORT_PRIVATE
 #else
 #define V8_EXPORT_PRIVATE
 #define V8_EXPORT_ENUM

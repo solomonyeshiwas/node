@@ -186,13 +186,24 @@ KNOWN_FAILURES = {
   'CrashTests/5694376231632896/1033966.js': 'flaky',
 }
 
-# Flags that are already crashy during smoke tests should not be used.
+# Flags that crash smoke tests or produce non-deterministic output should
+# not be used.
 DISALLOWED_FLAGS = [
-  # Bails out when sorting, leading to differences in sorted output.
-  '--multi-mapped-mock-allocator',
+    # Bails out when sorting, leading to differences in sorted output.
+    '--multi-mapped-mock-allocator',
 
-  # TODO(https://crbug.com/1393020): Changes the global object.
-  '--harmony-struct',
+    # TODO(https://crbug.com/1393020): Changes the global object.
+    '--harmony-struct',
+
+    # Cuts off stdout earlier in some situations and might alter the behavior
+    # of neutered runtime functions.
+    '--sandbox-testing',
+
+    # Various non-deterministic stats.
+    '--dump-counters',
+    '--expose-statistics',
+    '--log',
+    '--rcs',
 ]
 
 # List pairs of flags that lead to contradictory cycles, i.e.:
